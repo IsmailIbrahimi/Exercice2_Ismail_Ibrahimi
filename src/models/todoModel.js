@@ -1,27 +1,23 @@
+import { pool } from "../config/db.js";
+
 export default class TodoModel {
-    constructor() {
-        this.todos = [];
-        this.id = 1;
+    async getAll() {
+        const { rows } = await pool.query("SELECT id, title, done FROM todos ORDER BY id");
+        return rows;
     }
-
-    getAll() {
-        return this.todos;
+    async addTask(title) {
+        const { rows } = await pool.query(
+            "INSERT INTO todos(title) VALUES ($1) RETURNING id, title, done",
+            [title]
+        );
+        return rows[0];
     }
-
-    addTask(title) {
-        const newTask = { id: this.id++, title, done: false };
-        this.todos.push(newTask);
-        return newTask;
-    }
-
-    deleteTask(id) {
-        const idx = this.todos.findIndex((t) => t.id === id);
-        if (idx !== -1) {
-            return this.todos.splice(idx, 1)[0];
-        }
-        return null;
+    async deleteTask(id) {
+        const { rows } = await pool.query(
+            "DELETE FROM todos WHERE id = $1 RETURNING id, title, done",
+            [id]
+        );
+        return rows[0] || null;
     }
 }
-
-// Singleton en mémoire
 export const todoStore = new TodoModel();
