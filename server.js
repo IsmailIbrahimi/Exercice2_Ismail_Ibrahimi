@@ -1,29 +1,19 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import todoRoutes from "./src/routes/todoRoutes.js";
-import { ensureSchema, pool } from "./src/config/db.js";
+import routes from "./src/routes/todoRoutes.js";
+import { initBackend } from "./src/config/init.js";
 
 dotenv.config();
+
+await initBackend(); // connexion à Mongo ou Postgres selon DRIVER
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/todos", todoRoutes);
+app.use("/api/todos", routes);
 
 const PORT = process.env.PORT || 3000;
-
-(async () => {
-    try {
-        await pool.query("SELECT 1");
-        await ensureSchema();
-        app.listen(PORT, () =>
-            console.log(`API OK 👉 http://localhost:${PORT}`)
-        );
-    } catch (e) {
-        console.error("Erreur de démarrage:", e);
-        process.exit(1);
-    }
-})();
+app.listen(PORT, () => console.log(`API prête sur http://localhost:${PORT}`));

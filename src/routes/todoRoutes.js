@@ -1,10 +1,10 @@
 import express from "express";
-import TodoController from "../controllers/todoController.js";
+import controller from "../controllers/todoController.js";
 
 const router = express.Router();
 
-router.get("/", TodoController.list);
-router.post("/", TodoController.add);
-router.delete("/:id", TodoController.delete);
+router.get("/", controller.list);
+router.post("/", controller.add);
+router.delete("/:id", controller.delete);
 
 export default router;
