@@ -8,7 +8,7 @@ import { initBackend } from "./src/config/init.js";
 
 dotenv.config();
 
-await initBackend(); // connexion à Mongo ou Postgres selon DRIVER
+await initBackend(); // connexion à Mongo ou Postgres selon DRIVER dans .env
 
 const app = express();
 app.use(cors());
