@@ -7,17 +7,18 @@ import cors from "cors";
 import dotenv from "dotenv";
 import routes from "./src/routes/todoRoutes.js";
 import { initBackend } from "./src/config/init.js";
-// import swaggerUi from "swagger-ui-express";
-// import swaggerDocument from "./swagger.json" assert { type: "json" };
+import swaggerUi from "swagger-ui-express";
+import fs from "fs";
+const swaggerDocument = JSON.parse(fs.readFileSync("./swagger.json", "utf-8"));
 
 dotenv.config();
 
 await initBackend(); // connexion à Mongo ou Postgres selon DRIVER dans .env
 
 if (mongoose.connection.readyState === 0) {
-    const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/testDB";
-    await mongoose.connect(mongoUrl);
-    console.log("MongoDB connecté pour les users (JWT)");
+  const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/testDB";
+  await mongoose.connect(mongoUrl);
+  console.log("MongoDB connecté pour les users (JWT)");
 }
 
 const app = express();
@@ -26,7 +27,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/todos", routes);
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // POST /login
 app.post("/login", async (req, res, next) => {
@@ -109,6 +109,10 @@ app.post("/signup", async (req, res, next) => {
   });
 });
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API prête sur http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`API prête sur http://localhost:${PORT}`);
+  console.log(`Documentation Swagger: http://localhost:${PORT}/api-docs`);
+});

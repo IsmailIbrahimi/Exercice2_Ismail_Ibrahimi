@@ -38,6 +38,10 @@ JWT_EXPIRES_IN=1h
 npm run dev
 ```
 
+Après avoir lancer l'application, une documentation complète et interactive de l’API est disponible grâce à Swagger UI.  
+Elle permet de tester directement les routes (`/signup`, `/login`, `/api/todos`, etc.) depuis l’interface :  
+**[http://localhost:3000/api-docs](http://localhost:3000/api-docs)**
+
 ## 4. Gestion des utilisateurs (Auth + JWT)
 
 Pour tester l'application il est consseillé d'utilsier Postman.
@@ -225,5 +229,5 @@ SELECT * FROM todos;
 
 ## 11. Auteur
 
-Projet développé par [Ismail Ibrahimi](https://github.com/IsmailIbrahimi) avec l'aide de chatGPT pour mettre en place un switch de bdd, apporté une bonne architecture au projet et la rédaction d'une partie du README.
+Projet développé par [Ismail Ibrahimi](https://github.com/IsmailIbrahimi) avec l'aide de chatGPT pour mettre en place un switch de bdd, apporté une bonne architecture au projet, la rédaction d'une partie du README et la génération du fichier swagger.json.
 API REST complète avec gestion multi-base et authentification JWT.
