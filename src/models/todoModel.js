@@ -1,27 +1,7 @@
-export default class TodoModel {
-    constructor() {
-        this.todos = [];
-        this.id = 1;
-    }
+import { PostgresTodoStore } from "./adapters/postgresTodoStore.js";
+import { MongoTodoStore } from "./adapters/mongoTodoStore.js";
 
-    getAll() {
-        return this.todos;
-    }
+const drv = (process.env.DRIVER || "postgres").toLowerCase();
+const store = drv === "mongo" ? new MongoTodoStore() : new PostgresTodoStore();
 
-    addTask(title) {
-        const newTask = { id: this.id++, title, done: false };
-        this.todos.push(newTask);
-        return newTask;
-    }
-
-    deleteTask(id) {
-        const idx = this.todos.findIndex((t) => t.id === id);
-        if (idx !== -1) {
-            return this.todos.splice(idx, 1)[0];
-        }
-        return null;
-    }
-}
-
-// Singleton en mémoire
-export const todoStore = new TodoModel();
+export default store;

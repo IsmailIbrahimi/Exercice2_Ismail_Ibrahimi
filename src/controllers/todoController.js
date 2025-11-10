@@ -1,22 +1,21 @@
-import { todoStore } from "../models/todoModel.js";
+import store from "../models/todoModel.js";
 
-const list = (req, res) => {
-    res.json(todoStore.getAll());
+const list = async (_req, res) => {
+    const todos = await store.getAll();
+    res.json(todos);
 };
 
-const add = (req, res) => {
-    const { title } = req.body || {};
-    if (!title || typeof title !== "string") {
-        return res.status(400).json({ error: "title requis (string)" });
-    }
-    const created = todoStore.addTask(title.trim());
+const add = async (req, res) => {
+    const title = (req.body?.title ?? req.query?.title ?? "").trim();
+    if (!title) return res.status(400).json({ error: "title requis (string)" });
+    const created = await store.addTask(title);
     res.status(201).json(created);
 };
 
-const remove = (req, res) => {
-    const id = Number(req.params.id);
-    if (Number.isNaN(id)) return res.status(400).json({ error: "id invalide" });
-    const deleted = todoStore.deleteTask(id);
+const remove = async (req, res) => {
+    const id = req.params.id;
+    if (!id) return res.status(400).json({ error: "id invalide" });
+    const deleted = await store.deleteTask(id);
     if (!deleted) return res.status(404).json({ error: "tâche introuvable" });
     res.json(deleted);
 };
