@@ -1,123 +1,229 @@
-# Exercice2_Ismail_Ibrahimi | ToDoList API - Express, PostgreSQL & MongoDB
+# ToDoList API – Gestion des tâches et des utilisateurs (Express, MongoDB, PostgreSQL, JWT)
 
 ## 1. Description
 
-Ce projet est une API REST de gestion de tâches (ToDoList) développée
-avec **Express.js**.
-Elle prend en charge **deux systèmes de stockage** :
-- **PostgreSQL**, via le module `pg`
-- **MongoDB**, via `mongoose`
+Cette application expose une API REST complète développée avec Express.js, permettant :
 
-Le choix du moteur de base de données se fait dans le fichier `.env`
-grâce à la variable `DRIVER`.
+- la gestion d’une ToDoList (ajout, suppression, affichage des tâches),
+- la gestion des utilisateurs (inscription et connexion),
+- la génération de jetons JWT pour l’authentification.
 
-------------------------------------------------------------------------
+Les tâches peuvent être stockées soit dans MongoDB, soit dans PostgreSQL, selon la configuration choisie.
+Les utilisateurs sont stockés dans MongoDB et reçoivent un token JWT après la connexion.
 
-## 2. Installation
+## 2. Installation et configuration
 
-### Prérequis
+### Installation des dépendances
 
--   Node.js ≥ 18
--   PostgreSQL ≥ 14
--   MongoDB ≥ 6
-
-### Étapes d'installation
-
-1.  Cloner le dépôt ou copier les fichiers du projet.
-
-2.  Installer les dépendances :
-
-    ``` bash
-    npm install
-    ```
-
-3.  Créer un fichier `.env` à la racine et renseigner les variables :
-
-    ``` env
-    DRIVER=postgres        # ou mongo
-    PORT=3000
-
-    # PostgreSQL
-    DATABASE_URL=postgres://postgres:motdepasse@localhost:5432/todosdb
-
-    # MongoDB
-    MONGO_URL=mongodb://localhost:27017/todosdb
-    ```
-
-4.  Lancer le serveur :
-
-    ``` bash
-    npm run dev
-    ```
-
-    ou
-
-    ``` bash
-    npm start
-    ```
-
-------------------------------------------------------------------------
-
-## 3. Structure du projet
-
-    todolist-api/
-    │
-    ├── server.js
-    ├── .env
-    ├── package.json
-    └── src/
-        ├── config/
-        │   ├── init.js
-        │   ├── pg.js
-        │   └── mongo.js
-        │
-        ├── controllers/
-        │   └── todoController.js
-        │
-        ├── models/
-        │   ├── todoModel.js
-        │   └── adapters/
-        │       ├── postgresTodoStore.js
-        │       └── mongoTodoStore.js
-        │
-        └── routes/
-            └── todoRoutes.js
-
-------------------------------------------------------------------------
-
-## 4. Endpoints
-
-  ----------------------------------------------------------------------------------
-  Méthode      Route               Description              Corps attendu / Réponse
-  ------------ ------------------- ------------------------ ------------------------
-  **GET**      `/api/todos`        Liste toutes les tâches  Renvoie un tableau JSON
-
-  **POST**     `/api/todos`        Ajoute une nouvelle      `{ "title": "texte" }`
-                                   tâche                    
-
-  **DELETE**   `/api/todos/:id`    Supprime une tâche par   Objet JSON supprimé
-                                   son ID                   
-  ----------------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-## 5. Test rapide
-
-Dans Postman ou curl :
-
-``` bash
-POST http://localhost:3000/api/todos
-Body raw (JSON) → { "title": "Acheter du pain" }
-
-GET http://localhost:3000/api/todos
-DELETE http://localhost:3000/api/todos/1
+```bash
+npm install
 ```
 
-------------------------------------------------------------------------
+### Configuration du fichier .env
 
-## 6. Auteur
+Créer un fichier .env à la racine du projet :
 
-Projet réalisé par **Ibrahimi Ismail** dans le cadre du cours de
-développement backend.
-ChatGPT a contribué à la structuration du code, à la configuration des
-environnements et à la rédaction du README.
+```env
+DRIVER=mongo          # mongo ou postgres
+PORT=3000
+DATABASE_URL=postgres://postgres:motdepasse@localhost:5432/todosdb
+MONGO_URL=mongodb://localhost:27017/todosdb
+JWT_SECRET=secretkeyappearshere
+JWT_EXPIRES_IN=1h
+```
+
+## 3. Lancement de l’application
+
+```bash
+npm run dev
+```
+
+## 4. Gestion des utilisateurs (Auth + JWT)
+
+Pour tester l'application il est consseillé d'utilsier Postman.
+
+### Inscription (POST /signup)
+
+Crée un nouvel utilisateur et renvoie un token JWT.
+
+Requête :
+```
+POST http://localhost:3000/signup
+Content-Type: application/json (vérifier qu'il est bien présent et coché dans la partie headers)
+```
+
+Body (en raw):
+```json
+{
+  "name": "Ismail",
+  "email": "test@test.com",
+  "password": "123456"
+}
+```
+
+Réponse attendue :
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "6740f4f5b1...",
+    "email": "test@test.com",
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+### Connexion (POST /login)
+
+Renvoie un nouveau token JWT si les identifiants sont valides.
+
+Requête :
+```
+POST http://localhost:3000/login
+Content-Type: application/json (vérifier qu'il est bien présent et coché dans la partie headers)
+```
+
+Body (en raw):
+```json
+{
+  "email": "test@test.com",
+  "password": "123456"
+}
+```
+
+Réponse :
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "6740f4f5b1...",
+    "email": "test@test.com",
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+## 5. Gestion des tâches (ToDoList)
+
+Les routes todos sont préfixées par /api/todos.
+
+### Lister toutes les tâches
+
+```
+GET http://localhost:3000/api/todos
+```
+
+Réponse :
+```json
+[
+  { "id": 1, "title": "Faire les courses", "done": false },
+  { "id": 2, "title": "Réviser Node.js", "done": true }
+]
+```
+
+### Ajouter une tâche
+
+```
+POST http://localhost:3000/api/todos
+Content-Type: application/json (vérifier qu'il est bien présent et coché dans la partie headers)
+```
+
+Body (en raw):
+```json
+{ "title": "Apprendre PostgreSQL" }
+```
+
+Réponse :
+```json
+{ "id": 3, "title": "Apprendre PostgreSQL", "done": false }
+```
+
+### Supprimer une tâche
+
+```
+DELETE http://localhost:3000/api/todos/:id
+```
+
+Exemple :
+```
+DELETE http://localhost:3000/api/todos/3
+```
+
+Réponse :
+```json
+{ "id": 3, "title": "Apprendre PostgreSQL", "done": false }
+```
+
+## 6. Vérifier les données dans MongoDB Compass
+
+Pour vérifier que les données ont bien été saisis dans la bdd mongo, suivez ces étapes pour vérifier via MongoDB Compass:
+
+1. Ouvrir MongoDB Compass
+2. Se connecter avec : mongodb://localhost:27017
+3. Sélectionner la base todosdb
+4. Vous devriez voir :
+   - une collection users contenant les comptes créés via /signup
+   - une collection todos si vous utilisez Mongo comme DRIVER
+
+## 7. Vérifier les données dans PostgreSQL
+
+Si vous avez mis DRIVER=postgres :
+
+1. Se connecter avec psql :
+```bash
+psql -U postgres -d todosdb
+```
+2. Vérifier la table :
+```sql
+SELECT * FROM todos;
+```
+
+## 8. Exemple de test complet (Postman)
+
+1. POST /signup → crée un utilisateur et récupère le token
+2. POST /login → vérifie le compte et obtient un nouveau token
+3. POST /api/todos → ajoute une tâche
+4. GET /api/todos → liste toutes les tâches
+5. DELETE /api/todos/:id → supprime une tâche
+6. Vérifier dans MongoDB Compass ou PostgreSQL que les données existent
+
+## 9. Structure du projet
+
+```
+ EXERCICE2_IBRAHIMI_ISMAIL
+ ┣ src
+ ┃ ┣ config
+ ┃ ┃ ┣ init.js
+ ┃ ┃ ┣ mongo.js
+ ┃ ┃ ┗ pg.js
+ ┃ ┣ controllers
+ ┃ ┃ ┗ todoController.js
+ ┃ ┣ models
+ ┃ ┃ ┣ adapters
+ ┃ ┃ ┃ ┣ mongoToDoStore.js
+ ┃ ┃ ┃ ┗ postgresToDoStore.js
+ ┃ ┃ ┣ todoModel.js
+ ┃ ┃ ┗ userModel.js
+ ┃ ┗ routes
+ ┃   ┗ todoRoutes.js
+ ┣ .env
+ ┣ package.json
+ ┣ README.md
+ ┗ server.js
+```
+
+## 10. Technologies utilisées
+
+- Node.js
+- Express.js
+- MongoDB / Mongoose
+- PostgreSQL
+- JWT (jsonwebtoken)
+- Nodemon
+- Postman
+- MongoDB Compass
+
+## 11. Auteur
+
+Projet développé par [Ismail Ibrahimi](https://github.com/IsmailIbrahimi) avec l'aide de chatGPT pour mettre en place un switch de bdd, apporté une bonne architecture au projet et la rédaction d'une partie du README.
+API REST complète avec gestion multi-base et authentification JWT.
